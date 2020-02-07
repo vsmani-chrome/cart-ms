@@ -1,0 +1,40 @@
+---
+version: "3.7"
+services:
+  cart-frontend:
+    build:
+      context: ./frontend
+    image: vsmani29/cart-frontend:3.0
+    environment:
+      MY_DB_HOST_WRITE: myapp-db
+      MY_DB_HOST_READ: myapp-db
+      MY_DB_NAME: mydatadb
+      MY_DB_USER: mysqluser
+      MY_DB_PASS: password
+    ports:
+      - "9000:80"
+    volumes:
+      - type: volume
+        source: cart-frontend-logvol
+        target: /var/log
+  logagent:
+    build:
+      context: ./awslogs
+    image: vsmani29/logagent:1.0
+    depends_on: 
+      - cart-frontend
+    volumes:
+      - type: volume
+        source: cart-frontend-logvol
+        target: /mnt/log
+  myapp-db:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+    volumes:
+      - type: volume
+        source: myapp-db-vol
+        target: /var/lib/mysql
+volumes:
+  cart-frontend-logvol:
+  myapp-db-vol:
